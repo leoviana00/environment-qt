@@ -1,0 +1,248 @@
+#!/bin/bash
+
+# Passo a passo para utilizar este script.
+# 1. Abra o terminal linux através do atalho: Crt+ALT+T
+# 2. No terminal, execute o comando: $ sudo su
+# 3. Copie esse arquivo para a pasta de sua preferência; ex.: $ cp -R script_instalacao_dev /home/seu_usuario/
+# 4. Acesse a pasta onde está o arquivo install; ex.: $ cd /home/seu_usuario/script_instalacao_dev
+# 5. Execute o comando: $ chmod +x install
+# 6. Execute o script através do comando: sudo su; ./install 5.9.6
+
+
+function usage() {
+
+   if ! sudo apt list --installed 2> /dev/null | grep -i toilet
+   then
+    sudo apt-get install toilet -y
+   fi
+
+   if ! sudo apt list --installed 2> /dev/null | grep -i figlet
+   then
+    sudo apt-get install figlet -y
+   fi
+   
+
+   toilet -f smmono9 -F metal "DevInstaller"
+
+   toilet -f term -F crop $(basename "$0")' [-h] [-k] [-s n] [QT_VERSION] -- script for basic installation of It Happens development environment.'
+
+   toilet -f term -F crop 'where:'
+   toilet -f term -F crop '     -h  show this help text'
+   toilet -f term -F crop '     -k  create key ssh to access to git.mateus'
+   toilet -f term -F crop 'QT_VERSION  set the QT version that you will use. Example, to QT VERSION 5.9.3, so execute: ./install 5.9.3'
+
+}
+
+if [ -z $1 ]; then
+   usage
+   exit 1
+fi
+
+export sshParam=0
+
+while getopts ':hks:' option; do
+  case "$option" in
+    h) usage
+       exit
+       ;;
+    k) echo "O script irá criar automaticamente sua chave ssh"
+        sshParam=1
+       ;;
+   \?) printf "illegal option: -%s\n" "$OPTARG" >&2
+       usage >&2
+       exit 1
+       ;;
+  esac
+done
+shift $((OPTIND - 1))
+
+if [ "$sshParam" -eq "0" ];
+then
+
+  printf "\n\rINICIANDO SCRIPT DE INSTALAÇÃO PARA DESENVOLVEDORES DA IT HAPPENS - GRUPO MATEUS ... \n\r"
+
+  # compiladores do c++
+  if ! sudo apt install build-essential -y
+  then
+      printf "Não foi possível instalar o pacote build-essential\n\r"
+      exit 1
+  fi
+  printf "Instalação dos compilador do c++ finalizada\n\r"
+
+
+  # driver para conectar ao sql server, postgresql
+  if ! sudo apt install unixodbc unixodbc-dev freetds-dev freetds-bin tdsodbc postgresql-server-dev-all -y
+  then
+      printf "Não foi possível instalar os drivers para conectar ao sql server, postgresql\n\r"
+      exit 1
+  fi
+  printf "Instalação dos drivers sqlserver, postgresql finalizada...\n\r"
+
+  # stack trace do compilador do c++
+  if ! sudo apt install libx11-xcb-dev libdw1 libdw-dev libgl-dev -y
+  then
+    printf "Não foi possível instalar as libs libdw1 libdw-dev libgl-dev \n\r"
+    exit 1
+  fi
+  printf "Instalação das libs libdw1 libdw-dev finalizada...\n\r"
+
+  # bibliotecas para exibição de gráficos opengl para o qtcreator funcionar a compilação
+  if ! sudo apt install libgl1-mesa-dev qtdeclarative5-dev qml-module-qtquick-controls2 -y
+  then
+    printf "Não foi possível instalar as bibliotecas para exibição gráficas\n\r"
+    exit 1
+  fi
+  printf "Instalação das bibliotecas para exibição gráficas finalizada...\n\r"
+
+
+  # Install basic software support
+  if ! sudo apt install --yes software-properties-common
+  then
+    printf "Não foi possível instalar basic software support\n\r"
+    exit 1
+  fi
+  printf "Instalação dos basic software support foi finalizada...\n\r"
+
+  # instalar o icecc - compilação distribuida
+  if ! sudo apt install icecc -y
+  then
+    printf "Não foi possível instalar o icecc\n\r"
+    exit 1
+  fi
+  printf "Instalação do icecc finalizada...\n\r"
+
+
+  # sistema de controle de versões
+  if ! sudo apt install git-all -y
+  then
+    printf "Não foi possível instalar o git\n\r"
+    exit 1
+  fi
+  printf "Instalação do git finalizada...\n\r"
+
+  if ! sudo apt-get install libkf5globalaccel-bin yakuake -y
+  then
+    printf "Não foi possível instalar o terminal yakuake\n\r"
+    exit 1
+  fi
+  printf "Instalação do git yakuake...\n\r"
+
+  if ! sudo apt-get install htop -y
+  then
+    printf "Não foi possível instalar o terminal htop\n\r"
+    exit 1
+  fi
+  printf "Instalação do git htop...\n\r"
+
+  sudo apt-get update
+
+  sudo apt-get install software-properties-common debconf-utils -y
+
+  echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections
+  echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections
+
+  if ! sudo apt-get install openssh-server -y
+  then
+    printf "Não foi possível instalar o terminal openssh-server\n\r"
+    exit 1
+  fi
+  printf "Instalação do openssh-server...\n\r"
+
+  sudo apt-get install apt-transport-https ca-certificates curl software-properties-common -y
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  export LSB_ETC_LSB_RELEASE=/etc/upstream-release/lsb-release
+  version=$(lsb_release -cs)
+  sudo add-apt-repository \
+    "deb [arch=amd64] https://download.docker.com/linux/ubuntu ${version} stable"
+  
+  if ! sudo apt-get install smbclient -y
+  then
+    printf "Não foi possível instalar o terminal smbclient\n\r"
+    exit 1
+  fi
+  printf "Instalação do smbclient...\n\r"
+
+  sudo service ssh start
+
+  echo "Configuração do IECC iniciada...\n\r"
+  sudo sed -i 's/ICECC_NETNAME=""/ICECC_NETNAME="node"/' /etc/icecc/icecc.conf
+
+
+  sudo sed -i 's/ICECC_SCHEDULER_HOST=""/ICECC_SCHEDULER_HOST="icecc.mateus"/' /etc/icecc/icecc.conf
+  echo "Configuração do IECC finalizado...\n\r"
+
+  echo "Configuração do Drive ODBC iniciada...\n\r"
+  echo -e "[freetds]\r\ndescription    = v0.63 with protocol v8.0\r\ndriver    = /usr/lib/x86_64-linux-gnu/odbc/libtdsodbc.so\r\nsetup    = /usr/lib/x86_64-linux-gnu/odbc/libtdss.so\r\nusagecount    = 1" >> /etc/odbcinst.ini
+  echo "Configuração do Drive ODBC finalizada...\n\r"
+
+  printf "\n\rSCRIPT FINALIZADO ... \n\r"
+
+  if [ -z "$1" ]
+  then
+    QT_VERSION=5.12.2
+  else
+    QT_VERSION=$1
+  fi
+  QT_VERSION_FRIST="$(cut -d'.' -f1 <<<"$QT_VERSION")"
+  QT_VERSION_SECOND="$(cut -d'.' -f2 <<<"$QT_VERSION")"
+  QT_VERSION_MAJOR=$QT_VERSION_FRIST.$QT_VERSION_SECOND
+
+  printf "VERSAO QT A SER INSTALADA: "$QT_VERSION"\n"
+
+  # Compile and install Qt Base
+
+  QT_DIST=/home/$(whoami)/Qt"$QT_VERSION"
+  QT_BASE_SRC=https://download.qt.io/official_releases/qt/"$QT_VERSION_MAJOR"/"$QT_VERSION"/submodules/qtbase-opensource-src-"$QT_VERSION".tar.xz
+  QT_BASE_DIR=/qtbase-opensource-src-"$QT_VERSION"
+
+  echo "####################################"
+  echo "####################################"
+  echo " * desconecte da rede em 30 segundos"
+  echo "####################################"
+  echo "####################################"
+
+  sleep 30
+
+  [ ! -f '/root/install_developers-master/qt-opensource-linux-x64-5.9.3.run' ] && wget https://download.qt.io/archive/qt/${QT_VERSION_MAJOR}/${QT_VERSION}/qt-opensource-linux-x64-${QT_VERSION}.run
+
+  chmod +x qt-opensource-linux-x64-${QT_VERSION}.run
+
+  [ ! -f '/root/install_developers-master/qt-noninteractive.qs' ] && wget https://raw.githubusercontent.com/alfredocoj/install_developers/master/qt-noninteractive.qs
+
+  ./qt-opensource-linux-x64-${QT_VERSION}.run --script qt-noninteractive.qs  #-platform minimal
+
+  echo "####################################"
+  echo "####################################"
+  echo " * conecte da rede em 30 segundos"
+  sleep 30
+  echo "####################################"
+  echo "####################################"
+
+else
+  printf 'Criando sua chave ssh...\r\n';
+
+  cd /home/$(whoami)
+
+  ssh-keygen -t rsa
+
+  printf 'Sua chave ssh foi criada com sucesso!\r\n';
+
+  ls -la /home/$(whoami)/.ssh/id_rsa*
+fi
+
+
+if ! sudo apt list --installed 2> /dev/null | grep -i cowsay
+then
+  sudo apt-get install -y cowsay
+fi
+
+
+echo "Aperte <ENTER> para continuar..."
+read
+
+cowsay -f ghostbusters "Você: - Terminou? Agora eu posso trabalhar?..."
+
+echo "Aperte <ENTER> para continuar..."
+read
+
+cowsay "Sim, você pode"
