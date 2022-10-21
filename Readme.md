@@ -1,3 +1,9 @@
-## Ambiente de desenvolvimento
+## Environment Automation
 
-- Script para preparar ambiente de desenvolvimento em Qt e C++
+- Prparação de um script para preparar um ambiente de trabalho
+
+## Tolls
+
+- ShellScript
+- Vagrant
+- Virtualbox
