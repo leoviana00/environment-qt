@@ -41,7 +41,7 @@ IYELLOW='\033[1;33m'
 BWhite='\033[1;37m'
 
 #variables
-VERSION_QT=5.9.6
+# VERSION_QT=5.9.6
 
 # Forçar o script ser utilizado com user root
 if [[ ${EUID} -ne 0 ]]; then
@@ -180,11 +180,11 @@ log "Instalação do htop..."
 # --------------------------------------------------------------------
 #                         REMOVENDO OPENJDK
 # --------------------------------------------------------------------
-echo -e "${IYELLOW} TASK 12 - REMOVENDO OPENJDK ... ${NC}"
-sudo apt remove openjdk* -y >/dev/null 2>&1
-sudo add-apt-repository ppa:openjdk-r/ppa >/dev/null 2>&1
-sudo apt-get update -y >/dev/null 2>&1
-log "JDK removido ...."
+echo -e "${RED} TASK 12 - REMOVENDO OPENJDK - DESABILITADA... ${NC}"
+# sudo apt remove openjdk* -y >/dev/null 2>&1
+# sudo add-apt-repository ppa:openjdk-r/ppa >/dev/null 2>&1
+# sudo apt-get update -y >/dev/null 2>&1
+# log "JDK removido ...."
 
 # --------------------------------------------------------------------
 #                SOFTWARE PROPERTIES COMMON E DEBCONF-UTILS
@@ -303,11 +303,11 @@ log "Configuração do Drive ODBC finalizada..."
 # --------------------------------------------------------------------
 echo -e "${IYELLOW} TASK 23 - VERSÃO DO QT A SER INSTALADA... ${NC}"
 
-if [ -z "$VERSION_QT" ]
+if [ -z "$1" ]
 then
   QT_VERSION=5.12.2
 else
-  QT_VERSION=$VERSION_QT
+  QT_VERSION=$1
 fi
 QT_VERSION_FRIST="$(cut -d'.' -f1 <<<"$QT_VERSION")"
 QT_VERSION_SECOND="$(cut -d'.' -f2 <<<"$QT_VERSION")"
@@ -319,12 +319,11 @@ log "VERSAO QT A SER INSTALADA: "$QT_VERSION""
 # --------------------------------------------------------------------
 echo -e "${IYELLOW} TASK 24 - COMPILAR E INSTALAR QT BASE ... ${NC}"
 QT_DIST=/home/$(whoami)/Qt"$QT_VERSION"
-QT_BASE_SRC=https://download.qt.io/official_releases/qt/"$QT_VERSION_MAJOR"/"$QT_VERSION"/submodules/qtbase-opensource-src-"$QT_VERSION".tar.xz >/dev/null 2>&1
-QT_BASE_DIR=/qtbase-opensource-src-"$QT_VERSION" >/dev/null 2>&1
+QT_BASE_SRC=https://download.qt.io/official_releases/qt/"$QT_VERSION_MAJOR"/"$QT_VERSION"/submodules/qtbase-opensource-src-"$QT_VERSION".tar.xz 
+QT_BASE_DIR=/qtbase-opensource-src-"$QT_VERSION" 
+wget https://download.qt.io/archive/qt/${QT_VERSION_MAJOR}/${QT_VERSION}/qt-opensource-linux-x64-${QT_VERSION}.run 
 
-wget https://download.qt.io/archive/qt/${QT_VERSION_MAJOR}/${QT_VERSION}/qt-opensource-linux-x64-${QT_VERSION}.run >/dev/null 2>&1
-
-chmod +x qt-opensource-linux-x64-${QT_VERSION}.run >/dev/null 2>&1
+chmod +x qt-opensource-linux-x64-${QT_VERSION}.run 
 
 wget https://raw.githubusercontent.com/leoviana00/environment-work/master/qt-noninteractive.qs 
 
@@ -388,15 +387,15 @@ log "Instalação do telnet realizada com sucesso..."
 # --------------------------------------------------------------------
 #                           VIRTUALBOX
 # --------------------------------------------------------------------
-echo -e "${IYELLOW} TASK 30 - INSTALANDO VIRTUALBOX ... ${NC}"
-if ! sudo apt-get install virtualbox virtualbox-dkms -y >/dev/null 2>&1 
-then
-  log_err "Não foi possível instalar o virtualbox"
-  exit 1
-fi
-log "Instalação do virtualbox realizada com sucesso..."
-sleep 3
-vboxmanage --version
+echo -e "${RED} TASK 30 - INSTALANDO VIRTUALBOX - DESABILITADA... ${NC}"
+# if ! sudo apt-get install virtualbox -y 
+# then
+#   log_err "Não foi possível instalar o virtualbox"
+#   exit 1
+# fi
+# log "Instalação do virtualbox realizada com sucesso..."
+# sleep 3
+# vboxmanage --version
 
 # --------------------------------------------------------------------
 #                           VAGRANT
@@ -423,6 +422,17 @@ fi
 log "Instalação do ansible realizada com sucesso..."
 sleep 3
 ansible --version
+
+# --------------------------------------------------------------------
+#                          SUBLIME TEXT
+# --------------------------------------------------------------------
+echo -e "${RED} TASK 32 - INSTALANDO SUBLIME TEXT - DESABILITADA ... ${NC}"
+# if ! curl -fsSL https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add - && sudo add-apt-repository "deb https://download.sublimetext.com/ apt/stable/" && sudo apt install sublime-text -y
+# then
+#   printf "Não foi possível instalar o sublime"
+#   exit 1
+# fi
+# printf "Instalação do sublime finalizada..."
 
 # --------------------------------------------------------------------
 #                        INTERAÇÃO COWSAY
