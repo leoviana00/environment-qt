@@ -25,7 +25,7 @@ Vagrant.configure("2") do |config|
                 vb.memory = conf["memory"]
                 vb.cpus = conf["cpu"]
             end
-            machine.vm.provision "shell", path: "setup.sh" 
+            # machine.vm.provision "shell", path: "setup.sh" 
         end
     end
 end
